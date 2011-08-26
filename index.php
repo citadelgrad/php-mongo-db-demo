@@ -2,8 +2,7 @@
 <head>
 	<title>Learn PHP & MongoDB</title>
 <link rel="stylesheet" href="http://css.happyherbivore.com/960test/960.css" />
-<script type="text/javascript" 
-  src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+
 <style>
 p.tweets {
 	 overflow: hidden;
@@ -15,23 +14,17 @@ p.tweets {
     }
 p.tweets span {float:right;}
 
+p.db-docs {
+	 overflow: hidden;
+	 border-bottom: 3px solid orange;
+	 background: #000;
+	 padding: 5px;
+	 border-radius: 3px;
+	 color: white;
+    }
+p.db-docs span {float:right;}
+
 </style>
-<script>
-$(document).ready(function(){
-
-    $('.add').click( function () {
-        $.ajax({
-           url: '/',
-	   type: 'POST',
-	   success: function(result){
-	       location.reload(true);
-	   }
-	   });
-    
-    });
-
-});
-</script>
 
 </head>
 <body>
@@ -61,12 +54,14 @@ if ($_POST) {
 	// access collection
 	$collection = $db->items;
 
-	// execute query to retrieve all documents
-	//$cursor = $collection->find();
+	// Get twitter objects from static file
+	$lines = file_get_contents('stream.json');
+	$grp = json_decode($lines);
+	
+	// get a single tweet from a json doc
+	$tweetdoc = $grp[$_POST['tweetitem']];
 
-	//$collection->insert($someDoc);
-
-	echo "POST " . $_POST['tweetitem'] . "<br>";
+	$collection->insert($tweetdoc);	
 
 	$conn->close();
    } catch (MongoConectionException$e) {
@@ -77,25 +72,7 @@ if ($_POST) {
 
 }  
 
-$lines = file_get_contents('stream.json');
-$grp = json_decode($lines, true);
-
-$entry = $grp;
-
-echo $entry[1]['text'];
-
 ?>
-
-
-
-<form action="." method="POST">
-<input name="input" type="text">
-<input type="submit">
-</form>
-
-<p>
-
-</p>
 
 <?php
 try {
@@ -113,10 +90,9 @@ try {
 
 	echo $cursor -> count() .' document(s) found. <br>';
 	foreach ($cursor as $obj) {
-		echo 'Name: ' .$obj['name'] .'<br>';
-		echo 'Photo: ' .$obj['quanity'] .'<br>';
-		echo 'text: ' .$obj['price'] .'<br>';
-		echo '<br>';
+		echo "<p class='db-docs'><span" .$obj['user']['screen_name'];
+		echo "<img src='" .$obj['user']['profile_image_url'] ."'></span>";
+		echo $obj['text'] ."</p>";
 	}
 
 	$conn->close();
@@ -147,7 +123,17 @@ $grp = json_decode($lines);
 //echo "type of \$string: " .gettype($string) ."<br><br>";
 ?>
 
-<h2>Twitter Stream for <?php ?></h2>
+<h2>Twitter Stream for <?php echo $grp[0]->user->screen_name; ?></h2>
+
+<!--
+<p>
+<h4>Get twitter stream by username</h4>
+<form action="." method="POST">
+<input name="input" type="text">
+<input type="submit">
+</form>
+</p>
+ -->
 
 <?php
 
@@ -158,7 +144,7 @@ foreach ($grp as $key => $json) {
 	echo $json->text; 
 	echo "<form action='.' method=POST>";
 	echo "<input name='tweetitem' value='$key' type='hidden'>";
-	echo "<input type='submit' value='Add'></form></p>";
+	echo "<input type='submit' value='<-- Add to Database'></form></p>";
 }
 
 // source: http://de.php.net/json_last_error
