@@ -36,9 +36,6 @@ p.db-docs span {float:right;}
 ini_set ('display_errors', 1);
 
 error_reporting (E_ALL | E_STRICT);
-
-//$your_input = '';
-//$your_input = $_POST['input'];
 ?>
 
 <?php
@@ -88,12 +85,13 @@ try {
 	// execute query to retrieve all documents
 	$cursor = $collection->find();
 
-	echo $cursor -> count() .' document(s) found. <br>';
+
 	foreach ($cursor as $obj) {
-		echo "<p class='db-docs'><span" .$obj['user']['screen_name'];
+		echo "<p class='db-docs'><span>" .$obj['user']['screen_name'];
 		echo "<img src='" .$obj['user']['profile_image_url'] ."'></span>";
 		echo $obj['text'] ."</p>";
 	}
+	echo $cursor -> count() .' document(s) found. <br>';
 
 	$conn->close();
 } catch (MongoConectionException$e) {
